@@ -29,7 +29,7 @@ namespace PolyFeed
 
 
 			// Write the header
-			await feed.WriteGenerator("Polyfeed", "https://gitlab.com/sbrl/PolyFeed.git", Program.getProgramVersion());
+			await feed.WriteGenerator("Polyfeed", "https://gitlab.com/sbrl/PolyFeed.git", Program.GetProgramVersion());
 			await feed.WriteId(source.Url);
 			string lastModified = response.Headers.Get("last-modified");
 			if (string.IsNullOrWhiteSpace(lastModified))

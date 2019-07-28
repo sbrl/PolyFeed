@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Nett;
 
 namespace PolyFeed
 {
@@ -9,7 +10,9 @@ namespace PolyFeed
 	{
 		public readonly string ProgramName = "PolyFeed";
 		public readonly string Description = "creates Atom feeds from websites that don't support it";
-		// Settings here
+
+		public string ConfigFilepath = "feed.toml";
+		public string OutputFilepath = "feed.atom";
 	}
 
 	class Program
@@ -33,7 +36,7 @@ namespace PolyFeed
 				{
 					case "-h":
 					case "--help":
-						Console.WriteLine($"{settings.ProgramName}, {getProgramVersion()}");
+						Console.WriteLine($"{settings.ProgramName}, {GetProgramVersion()}");
 						Console.WriteLine("    By Starbeamrainbowlabs");
 
 						Console.WriteLine();
@@ -43,14 +46,26 @@ namespace PolyFeed
 						Console.WriteLine($"    ./{Path.GetFileName(Assembly.GetExecutingAssembly().Location)} [arguments]");
 						Console.WriteLine();
 						Console.WriteLine("Options:");
-						Console.WriteLine("    -h  --help    Displays this message");
-						Console.WriteLine("    -v  --version Outputs the version number of this program");
+						Console.WriteLine("    -h  --help       Displays this message");
+						Console.WriteLine("    -v  --version    Outputs the version number of this program");
+						Console.WriteLine("    -c  --config     Specifies the location of the feed configuration file to use to generate a feed (default: feed.toml)");
+						Console.WriteLine("    -o  --output     Specifies the location to write the output feed to (default: feed.atom)");
 						return 0;
 
 					case "-v":
 					case "--version":
-						Console.WriteLine($"{settings.ProgramName}\t{getProgramVersion()}");
+						Console.WriteLine($"{settings.ProgramName}\t{GetProgramVersion()}");
 						return 0;
+
+					case "-c":
+					case "--config":
+						settings.ConfigFilepath = args[++i];
+						break;
+
+					case "-o":
+					case "--output":
+						settings.OutputFilepath = args[++i];
+						break;
 				}
 			}
 
@@ -64,10 +79,25 @@ namespace PolyFeed
 			return 0;
 		}
 
+		private static void run()
+		{
+			FeedSource feedSource = new FeedSource();
+			TomlTable config = Toml.ReadFile(settings.ConfigFilepath, TomlSettings.Create());
+
+			foreach (KeyValuePair<string, TomlObject> item in config) {
+				string key = item.Key;
+				string value = item.Value.Get<TomlString>().Value;
+				feedSource.GetType().GetProperty(value).SetValue(
+					feedSource,
+					value
+				);
+			}
+		}
+
 
 		#region Helper Methods
 
-		public static string getProgramVersion()
+		public static string GetProgramVersion()
 		{
 			Version version = Assembly.GetExecutingAssembly().GetName().Version;
 			return $"{version.Major}.{version.Minor}";
