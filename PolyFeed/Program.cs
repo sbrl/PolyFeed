@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Nett;
 
 namespace PolyFeed
@@ -79,19 +81,27 @@ namespace PolyFeed
 			return 0;
 		}
 
-		private static void run()
+		private static async Task<string> run()
 		{
 			FeedSource feedSource = new FeedSource();
 			TomlTable config = Toml.ReadFile(settings.ConfigFilepath, TomlSettings.Create());
 
 			foreach (KeyValuePair<string, TomlObject> item in config) {
-				string key = item.Key;
+				string key = Regex.Replace(
+					item.Key,
+					@"(^|_)[A-Za-z0-9]",
+					(match) => match.Value.Replace("_", "").ToUpper()
+				);
 				string value = item.Value.Get<TomlString>().Value;
 				feedSource.GetType().GetProperty(value).SetValue(
 					feedSource,
 					value
 				);
 			}
+
+			FeedBuilder feedBuilder = new FeedBuilder();
+			await feedBuilder.AddSource(feedSource);
+			return await feedBuilder.Render();
 		}
 
 

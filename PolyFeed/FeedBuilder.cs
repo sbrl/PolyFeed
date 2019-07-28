@@ -87,7 +87,16 @@ namespace PolyFeed
 							: lastUpdatedNode.Attributes[source.EntryLastUpdatedAttribute].DeEntitizeValue
 					);
 				}
+
+				await feed.Write(nextItem); 
 			}
+		}
+
+		public string Render()
+		{
+			xml.Flush();
+			xml.WriteEndDocument();
+			return result.ToString();
 		}
 	}
 }
