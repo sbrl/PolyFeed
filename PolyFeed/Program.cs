@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace ProjectNamespace
+namespace PolyFeed
 {
 	internal class Settings
 	{
@@ -67,7 +67,7 @@ namespace ProjectNamespace
 
 		#region Helper Methods
 
-		private static string getProgramVersion()
+		public static string getProgramVersion()
 		{
 			Version version = Assembly.GetExecutingAssembly().GetName().Version;
 			return $"{version.Major}.{version.Minor}";
