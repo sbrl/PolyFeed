@@ -24,8 +24,8 @@ namespace PolyFeed
 			AddRules(new List<LexerRule<SubstitutionToken>>() {
 				new LexerRule<SubstitutionToken>(SubstitutionToken.Text, @"[^{}]+"),
 				new LexerRule<SubstitutionToken>(SubstitutionToken.Identifier, @"[^{}]+"),
-				new LexerRule<SubstitutionToken>(SubstitutionToken.BraceOpen, @"\{"),
-				new LexerRule<SubstitutionToken>(SubstitutionToken.BraceClose, @"\}"),
+				new LexerRule<SubstitutionToken>(SubstitutionToken.BraceOpen, @"\{+"),
+				new LexerRule<SubstitutionToken>(SubstitutionToken.BraceClose, @"\}+"),
 			});
 		}
 

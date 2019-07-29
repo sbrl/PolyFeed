@@ -15,16 +15,17 @@ namespace PolyFeed
 {
 	public class FeedBuilder
 	{
-		StringBuilder result = new StringBuilder();
+		MemoryStream stream = new MemoryStream();
 		XmlWriter xml = null;
 		AtomFeedWriter feed = null;
 
 		public FeedBuilder() {
-			xml = XmlWriter.Create(result, new XmlWriterSettings() {
+			xml = XmlWriter.Create(stream, new XmlWriterSettings() {
 				Indent = true,
-				IndentChars = "\t"
+				Encoding = new UTF8Encoding(false),
+				WriteEndDocumentOnClose = true
 			});
-			feed = new AtomFeedWriter(xml);
+			feed = new AtomFeedWriter(xml, null, new AtomFormatter() { UseCDATA = true });
 		}
 
 		public async Task AddSource(FeedSource source) {
@@ -36,6 +37,7 @@ namespace PolyFeed
 			// Write the header
 			await feed.WriteGenerator("Polyfeed", "https://github.com/sbrl/PolyFeed.git", Program.GetProgramVersion());
 			await feed.WriteId(source.Feed.Url);
+			await feed.Write(new SyndicationLink(new Uri(source.Feed.Url), AtomLinkTypes.Self));
 			string lastModified = response.Headers.Get("last-modified");
 			if (string.IsNullOrWhiteSpace(lastModified))
 				await feed.WriteUpdated(DateTimeOffset.Now);
@@ -86,12 +88,14 @@ namespace PolyFeed
 				string url = source.Entries.Url.Attribute == string.Empty ?
 					urlNode.InnerText : urlNode.Attributes[source.Entries.Url.Attribute].DeEntitizeValue;
 
-
-				SyndicationItem nextItem = new SyndicationItem() {
-					Id = new Uri(new Uri(source.Feed.Url), new Uri(url)).ToString(),
+				Uri entryUri = new Uri(new Uri(source.Feed.Url), new Uri(url));
+				AtomEntry nextItem = new AtomEntry() {
+					Id = entryUri.ToString(),
 					Title = ReferenceSubstitutor.Replace(source.Entries.Title, nextNode),
 					Description = ReferenceSubstitutor.Replace(source.Entries.Content, nextNode),
+					ContentType = "html"
 				};
+				nextItem.AddLink(new SyndicationLink(entryUri, AtomLinkTypes.Alternate));
 
 				if (source.Entries.Published != null) {
 					nextItem.Published = DateTime.Parse(
@@ -130,7 +134,8 @@ namespace PolyFeed
 			await feed.Flush();
 			xml.WriteEndDocument();
 			xml.Flush();
-			return result.ToString();
+			xml.Close();
+			return Encoding.UTF8.GetString(stream.ToArray());
 		}
 	}
 }

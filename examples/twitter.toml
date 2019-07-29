@@ -1,7 +1,7 @@
 [feed]
-output = "CrossCodeLea-Twitter.atom"
+output = "euruicimages-Twitter.atom"
 
-url = "https://mobile.twitter.com/CrossCodeLea"
+url = "https://mobile.twitter.com/euruicimages"
 
 source_type = "html"
 
@@ -12,8 +12,8 @@ logo_url = { selector = ".avatar img", attribute = "src" }
 
 [entries]
 selector = ".tweet"
-title = "Tweet by {.username}"
-content = "{.tweet-social-context}<br />{.avatar}{.fullname}<br />{.tweet-content}"
+title = "Tweet by {{.username}} {{.tweet-social-context}}"
+content = "<p><strong>{.avatar}{.fullname}:</strong></p>\n{.tweet-text}"
 
 url = { selector = ".metadata a", attribute = "href" }
 
