@@ -67,6 +67,9 @@ namespace PolyFeed
 
 			HtmlNode document = html.DocumentNode;
 
+			document.AbsolutifyUris(new Uri(source.Feed.Url));
+
+
 			await Console.Error.WriteLineAsync("[Builder/Html] Generating feed content");
 
 			// Add the title
