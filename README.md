@@ -32,6 +32,7 @@ path/to/PolyFeed.exe --config path/to/config.toml
 
 ...it will generate the named `.atom` file automatically, keeping you up-to-date on it's progress and any errors it encounters.
 
+Use `PolyFeed.exe --help` to display the full range of command-line flags available.
 
 ## Contributing
 Contributions are welcome - feel free to [open an issue](https://github.com/sbrl/PolyFeed/issues/new) or (even better) a [pull request](https://github.com/sbrl/PolyFeed/compare).
