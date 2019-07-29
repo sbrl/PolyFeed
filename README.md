@@ -22,8 +22,15 @@ The build output will be outputted to `PolyFeed/bin/Release`.
 
 
 ## Usage
+PolyFeed uses [TOML](https://github.com/toml-lang/toml) configuration files to define Atom feeds. First, create a configuration file that specifies how PolyFeed should generate an Atom feed - or use [one of the examples](https://github.com/sbrl/PolyFeed/tree/master/examples).
 
+Then, run PolyFeed over it:
 
+```bash
+path/to/PolyFeed.exe --config path/to/config.toml
+```
+
+...it will generate the named `.atom` file automatically, keeping you up-to-date on it's progress and any errors it encounters.
 
 
 ## Contributing
