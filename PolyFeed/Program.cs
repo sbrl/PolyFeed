@@ -13,7 +13,7 @@ namespace PolyFeed
 		public readonly string ProgramName = "PolyFeed";
 		public readonly string Description = "creates Atom feeds from websites that don't support it";
 
-		public string ConfigFilepath = "feed.toml";
+		public string ConfigFilepath = null;
 		public string OutputFilepath = "feed.atom";
 	}
 
@@ -38,20 +38,7 @@ namespace PolyFeed
 				{
 					case "-h":
 					case "--help":
-						Console.WriteLine($"{settings.ProgramName}, {GetProgramVersion()}");
-						Console.WriteLine("    By Starbeamrainbowlabs");
-
-						Console.WriteLine();
-						Console.WriteLine($"This program {settings.Description}.");
-						Console.WriteLine();
-						Console.WriteLine("Usage:");
-						Console.WriteLine($"    ./{Path.GetFileName(Assembly.GetExecutingAssembly().Location)} [arguments]");
-						Console.WriteLine();
-						Console.WriteLine("Options:");
-						Console.WriteLine("    -h  --help       Displays this message");
-						Console.WriteLine("    -v  --version    Outputs the version number of this program");
-						Console.WriteLine("    -c  --config     Specifies the location of the feed configuration file to use to generate a feed (default: feed.toml)");
-						Console.WriteLine("    -o  --output     Specifies the location to write the output feed to (default: feed.atom)");
+						showHelp();
 						return 0;
 
 					case "-v":
@@ -71,37 +58,64 @@ namespace PolyFeed
 				}
 			}
 
+			if (settings.ConfigFilepath == null) {
+				Console.Error.WriteLine("Error: No configuration filepath detected. Try " +
+					"using --help to show usage information.");
+				return 1;
+			}
+
 			///// 2: Acquire environment variables /////
 
 
 			///// 3: Run program /////
 
-
-
-			return 0;
+			return run().Result;
 		}
 
-		private static async Task<string> run()
+		private static void showHelp()
 		{
-			FeedSource feedSource = new FeedSource();
-			TomlTable config = Toml.ReadFile(settings.ConfigFilepath, TomlSettings.Create());
+			Console.WriteLine($"{settings.ProgramName}, {GetProgramVersion()}");
+			Console.WriteLine("    By Starbeamrainbowlabs");
 
-			foreach (KeyValuePair<string, TomlObject> item in config) {
-				string key = Regex.Replace(
-					item.Key,
-					@"(^|_)[A-Za-z0-9]",
-					(match) => match.Value.Replace("_", "").ToUpper()
-				);
-				string value = item.Value.Get<TomlString>().Value;
-				feedSource.GetType().GetProperty(value).SetValue(
-					feedSource,
-					value
-				);
+			Console.WriteLine();
+			Console.WriteLine($"This program {settings.Description}.");
+			Console.WriteLine();
+			Console.WriteLine("Usage:");
+			Console.WriteLine($"    ./{Path.GetFileName(Assembly.GetExecutingAssembly().Location)} [arguments]");
+			Console.WriteLine();
+			Console.WriteLine("Options:");
+			Console.WriteLine("    -h  --help       Displays this message");
+			Console.WriteLine("    -v  --version    Outputs the version number of this program");
+			Console.WriteLine("    -c  --config     Specifies the location of the TOML feed configuration file to use to generate a feed");
+			Console.WriteLine("    -o  --output     Specifies the location to write the output feed to (default: feed.atom)");
+		}
+
+		private static async Task<int> run()
+		{
+			TomlSettings parseSettings = TomlSettings.Create(s =>
+				s.ConfigurePropertyMapping(m => m.UseTargetPropertySelector(new SnakeCasePropertySelector()))
+			);
+			FeedSource feedSource = Toml.ReadFile<FeedSource>(settings.ConfigFilepath, parseSettings);
+
+			if (feedSource == null) {
+				Console.Error.WriteLine("Error: Somethine went wrong when parsing your settings file :-(");
+				return 1;
 			}
 
+			if (!string.IsNullOrWhiteSpace(feedSource.Feed.Output))
+				settings.OutputFilepath = feedSource.Feed.Output;
+
 			FeedBuilder feedBuilder = new FeedBuilder();
-			await feedBuilder.AddSource(feedSource);
-			return await feedBuilder.Render();
+			try {
+				await feedBuilder.AddSource(feedSource);
+			} catch (ApplicationException error) {
+				Console.Error.WriteLine(error.Message);
+				return 2;
+			}
+			await Console.Error.WriteLineAsync($"[Output] Writing feed to {settings.OutputFilepath}");
+			File.WriteAllText(settings.OutputFilepath, await feedBuilder.Render());
+
+			return 0;
 		}
 
 

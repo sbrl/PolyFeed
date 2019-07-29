@@ -4,8 +4,29 @@ namespace PolyFeed
 {
 	public enum SourceType { HTML, XML, JSON };
 
-	public class FeedSource
+	public class SelectorSettings
 	{
+		/// <summary>
+		/// A selector that matches against an element to select.
+		/// </summary>
+		public string Selector { get; set; }
+		/// <summary>
+		/// The name of the attribute to get the value of.
+		/// Set to an empty string to select the content of the element instead of the 
+		/// content of an attribute.
+		/// </summary>
+		public string Attribute { get; set; }
+
+		public override string ToString()
+		{
+			return $"[SelectorSettings Selector = {Selector}, Attribute = {Attribute}]";
+		}
+	}
+
+	public class FeedSettings
+	{
+		public string Output { get; set; }
+
 		/// <summary>
 		/// The url of the source document to parse.
 		/// </summary>
@@ -15,7 +36,9 @@ namespace PolyFeed
 		/// <summary>
 		/// The type of source document to expect.
 		/// </summary>
-		public SourceType SourceType { get; set; }
+		public string SourceType { get; set; }
+		public SourceType Type => (SourceType)Enum.Parse(typeof(SourceType), SourceType, true);
+
 
 		/// <summary>
 		/// The title of the feed.
@@ -29,22 +52,14 @@ namespace PolyFeed
 		/// <value>The subtitle.</value>
 		public string Subtitle { get; set; }
 
-
-		#region Entries
-
 		/// <summary>
-		/// A selector that matches against an element that contains the URL that an
-		/// entry should link to.
-		/// Relative to the element selected by <see cref="EntrySelector" />.
+		/// Selector that matches against the feed logo url.
 		/// </summary>
-		public string EntryUrlSelector { get; set; }
-		/// <summary>
-		/// The name of the attribute on the element selected by <see cref="EntryUrlSelector" />.
-		/// Set to an empty string to select the content of the element instead of the 
-		/// content of an attribute.
-		/// </summary>
-		public string EntryUrlAttribute { get; set; } = "";
+		public SelectorSettings Logo { get; set; }
+	}
 
+	public class EntrySettings
+	{
 		/// <summary>
 		/// The selector that specifies the location of nodes in the object model that 
 		/// should be added to the feed.
@@ -53,41 +68,42 @@ namespace PolyFeed
 		///  - XML: XPath (e.g. //element_name)
 		///  - JSON: Dotted object  (e.g. items.fruit)
 		/// </summary>
-		public string EntrySelector { get; set; }
+		public string Selector { get; set; }
+		/// <summary>
+		/// Selector settings to get the URL that an entry should link to.
+		/// </summary>
+		public SelectorSettings Url { get; set; } = new SelectorSettings() { Attribute = "href" };
+
 		/// <summary>
 		/// The title of an entry.
 		/// Selectors may be included in curly braces {} to substitute in content.
 		/// Such selectors are relative to the current feed entry.
-		/// The format varies in the samem  way as <see cref="EntrySelector" /> does.
+		/// The format varies in the same way as <see cref="Selector" /> does.
 		/// </summary>
-		public string EntryTitle { get; set; }
+		public string Title { get; set; }
 		/// <summary>
-		/// Same as <see cref="EntryTitle" />, but for the body of an entry. HTML is allowed.
+		/// Same as <see cref="Title" />, but for the body of an entry. HTML is allowed.
 		/// </summary>
-		public string EntryContent { get; set; }
+		public string Content { get; set; }
 
 		/// <summary>
-		/// The selector for the node that contains the date published for an entry.
+		/// The selector for the date published for an entry.
 		/// </summary>
-		public string EntryPublishedSelector { get; set; }
+		public SelectorSettings Published { get; set; }
 
 		/// <summary>
-		/// The name of the attribute that contains the date published for an entry.
-		/// Set to <see cref="string.Empty" /> to use the content of the node itself.
+		/// The selector for the date published for an entry.
 		/// </summary>
-		public string EntryPublishedAttribute { get; set; }
+		public SelectorSettings LastUpdated { get; set; }
 
-		/// <summary>
-		/// Same as <see cref="EntryPublishedSelector" />, but for the last updated.
-		/// If not specified, the last updated will be omitted.
-		/// </summary>
-		public string EntryLastUpdatedSelector { get; set; }
-		/// <summary>
-		/// Same as <see cref="EntryPublishedAttribute" />.
-		/// </summary>
-		public string EntryLastUpdatedAttribute { get; set; }
+		public SelectorSettings AuthorName { get; set; }
+		public SelectorSettings AuthorUrl { get; set; }
 
-		#endregion
+	}
 
+	public class FeedSource
+	{
+		public FeedSettings Feed { get; set; }
+		public EntrySettings Entries { get; set; }
 	}
 }

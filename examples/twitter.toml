@@ -1,0 +1,23 @@
+[feed]
+output = "CrossCodeLea-Twitter.atom"
+
+url = "https://mobile.twitter.com/CrossCodeLea"
+
+source_type = "html"
+
+title = "{{.username}} on Twitter"
+subtitle = "{{.details}}"
+
+logo_url = { selector = ".avatar img", attribute = "src" }
+
+[entries]
+selector = ".tweet"
+title = "Tweet by {.username}"
+content = "{.tweet-social-context}<br />{.avatar}{.fullname}<br />{.tweet-content}"
+
+url = { selector = ".metadata a", attribute = "href" }
+
+author_name = { selector = ".username" }
+
+# published = { selector = "", attribute = "" }
+# last_updated = { selector = "", attribute = "" }

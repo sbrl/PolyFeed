@@ -15,10 +15,14 @@ namespace PolyFeed
 			SubstitutionLexer lexer = lexerPool.AcquireLexer();
 			lexer.Initialise(inputString);
 
+			bool useHtml = true;
+
 			foreach (LexerToken<SubstitutionToken> nextToken in lexer.TokenStream())
 			{
 				switch (nextToken.Type) {
 					case SubstitutionToken.BraceOpen:
+						useHtml = nextToken.Value.Length == 1;
+
 						lexer.SaveRuleStates();
 						lexer.EnableRule(SubstitutionToken.Identifier);
 						lexer.DisableRule(SubstitutionToken.Text);
@@ -32,7 +36,12 @@ namespace PolyFeed
 						break;
 
 					case SubstitutionToken.Identifier:
-						result.Append(rootElement.QuerySelector(nextToken.Value));
+						HtmlNode targetNode = rootElement.QuerySelector(nextToken.Value);
+						if (targetNode == null) {
+							Console.Error.WriteLine($"Warning: Selector {nextToken.Value} failed to match any elements");
+							break;
+						}
+						result.Append(useHtml ? targetNode.InnerHtml : targetNode.InnerText);
 						break;
 				}
 			}

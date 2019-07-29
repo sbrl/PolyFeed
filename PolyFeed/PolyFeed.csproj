@@ -147,12 +147,15 @@
     <Compile Include="SubstitutionLexer.cs" />
     <Compile Include="Salamander.Core\LexerPool.cs" />
     <Compile Include="ReferenceSubstitutor.cs" />
+    <Compile Include="SnakeCasePropertySelector.cs" />
+    <Compile Include="Helpers\HtmlHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Salamander.Core\" />
+    <Folder Include="Helpers\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" />

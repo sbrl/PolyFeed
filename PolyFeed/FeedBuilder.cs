@@ -9,6 +9,7 @@ using Fizzler.Systems.HtmlAgilityPack;
 using HtmlAgilityPack;
 using Microsoft.SyndicationFeed;
 using Microsoft.SyndicationFeed.Atom;
+using PolyFeed.Helpers;
 
 namespace PolyFeed
 {
@@ -19,18 +20,22 @@ namespace PolyFeed
 		AtomFeedWriter feed = null;
 
 		public FeedBuilder() {
-			xml = XmlWriter.Create(result);
+			xml = XmlWriter.Create(result, new XmlWriterSettings() {
+				Indent = true,
+				IndentChars = "\t"
+			});
 			feed = new AtomFeedWriter(xml);
 		}
 
 		public async Task AddSource(FeedSource source) {
-			WebResponse response = await WebRequest.Create(source.Url).GetResponseAsync();
+			await Console.Error.WriteLineAsync("[Builder] Downloading content");
+			WebResponse response = await WebRequest.Create(source.Feed.Url).GetResponseAsync();
 
-
+			await Console.Error.WriteLineAsync("[Builder] Generating feed header");
 
 			// Write the header
-			await feed.WriteGenerator("Polyfeed", "https://gitlab.com/sbrl/PolyFeed.git", Program.GetProgramVersion());
-			await feed.WriteId(source.Url);
+			await feed.WriteGenerator("Polyfeed", "https://github.com/sbrl/PolyFeed.git", Program.GetProgramVersion());
+			await feed.WriteId(source.Feed.Url);
 			string lastModified = response.Headers.Get("last-modified");
 			if (string.IsNullOrWhiteSpace(lastModified))
 				await feed.WriteUpdated(DateTimeOffset.Now);
@@ -39,63 +44,92 @@ namespace PolyFeed
 
 			string contentType = response.Headers.Get("content-type");
 
-			switch (source.SourceType) {
+			switch (source.Feed.Type) {
 				case SourceType.HTML:
 					await AddSourceHtml(source, response);
 					break;
 				default:
-					throw new NotImplementedException($"Error: The source type {source.SourceType} hasn't been implemented yet.");
+					throw new NotImplementedException($"Error: The source type {source.Feed.Type} hasn't been implemented yet.");
 			}
+
+			await Console.Error.WriteLineAsync("[Builder] Done!");
 		}
 
 		private async Task AddSourceHtml(FeedSource source, WebResponse response) {
+			await Console.Error.WriteLineAsync("[Builder/Html] Parsing Html");
+
+			// Parse the HTML
 			HtmlDocument html = new HtmlDocument();
 			using (StreamReader reader = new StreamReader(response.GetResponseStream()))
 				html.LoadHtml(await reader.ReadToEndAsync());
 
 			HtmlNode document = html.DocumentNode;
 
-			await feed.WriteTitle(ReferenceSubstitutor.Replace(source.Title, document));
-			await feed.WriteSubtitle(ReferenceSubstitutor.Replace(source.Subtitle, document));
+			await Console.Error.WriteLineAsync("[Builder/Html] Generating feed content");
 
-			foreach (HtmlNode nextNode in document.QuerySelectorAll(source.EntrySelector)) {
-				HtmlNode urlNode = nextNode.QuerySelector(source.EntryUrlSelector);
-				string url = source.EntryUrlAttribute == string.Empty ? 
-					urlNode.InnerText : urlNode.Attributes[source.EntryUrlAttribute].DeEntitizeValue;
+			// Add the title
+			await feed.WriteTitle(ReferenceSubstitutor.Replace(source.Feed.Title, document));
+			await feed.WriteSubtitle(ReferenceSubstitutor.Replace(source.Feed.Subtitle, document));
+
+			// Add the logo
+			if (source.Feed.Logo != null) {
+				HtmlNode logoNode = document.QuerySelector(source.Feed.Logo.Selector);
+				xml.WriteElementString("logo", logoNode.Attributes[source.Feed.Logo.Attribute].Value);
+			}
+
+			// Add the feed entries
+			foreach (HtmlNode nextNode in document.QuerySelectorAll(source.Entries.Selector)) {
+				HtmlNode urlNode = nextNode.QuerySelector(source.Entries.Url.Selector);
+				if (urlNode == null)
+					throw new ApplicationException("Error: Failed to match entry url selector against an element.");
+
+				string url = source.Entries.Url.Attribute == string.Empty ?
+					urlNode.InnerText : urlNode.Attributes[source.Entries.Url.Attribute].DeEntitizeValue;
 
 
 				SyndicationItem nextItem = new SyndicationItem() {
-					Id = url,
-					Title = ReferenceSubstitutor.Replace(source.EntryTitle, nextNode),
-					Description = ReferenceSubstitutor.Replace(source.EntryContent, nextNode)
+					Id = new Uri(new Uri(source.Feed.Url), new Uri(url)).ToString(),
+					Title = ReferenceSubstitutor.Replace(source.Entries.Title, nextNode),
+					Description = ReferenceSubstitutor.Replace(source.Entries.Content, nextNode),
 				};
 
-				if (source.EntryPublishedSelector != string.Empty) {
-					HtmlNode publishedNode = nextNode.QuerySelector(source.EntryPublishedSelector);
+				if (source.Entries.Published != null) {
 					nextItem.Published = DateTime.Parse(
-						source.EntryPublishedAttribute == string.Empty
-							? publishedNode.InnerText
-							: publishedNode.Attributes[source.EntryPublishedAttribute].DeEntitizeValue
+						nextNode.QuerySelectorAttributeOrText(
+							source.Entries.Published
+						)
 					);
 
 				}
-				if (source.EntryPublishedSelector != string.Empty) {
-					HtmlNode lastUpdatedNode = nextNode.QuerySelector(source.EntryLastUpdatedSelector);
-					nextItem.Published = DateTime.Parse(
-						source.EntryLastUpdatedAttribute == string.Empty
-							? lastUpdatedNode.InnerText
-							: lastUpdatedNode.Attributes[source.EntryLastUpdatedAttribute].DeEntitizeValue
+				if (source.Entries.Published != null) {
+					nextItem.LastUpdated = DateTime.Parse(
+						nextNode.QuerySelectorAttributeOrText(
+							source.Entries.LastUpdated
+						)
 					);
 				}
+				else // It requires one, apparently
+					nextItem.LastUpdated = DateTimeOffset.Now;
 
-				await feed.Write(nextItem); 
+				SyndicationPerson author = new SyndicationPerson(
+					nextNode.QuerySelectorAttributeOrText(source.Entries.AuthorName).Trim(),
+					""
+				);
+				if(source.Entries.AuthorUrl != null)
+					author.Uri = nextNode.QuerySelectorAttributeOrText(source.Entries.AuthorUrl);
+
+				nextItem.AddContributor(author);
+
+				await feed.Write(nextItem);
+
 			}
 		}
 
-		public string Render()
+		public async Task<string> Render()
 		{
-			xml.Flush();
+			await feed.Flush();
 			xml.WriteEndDocument();
+			xml.Flush();
 			return result.ToString();
 		}
 	}
