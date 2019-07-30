@@ -30,7 +30,10 @@ namespace PolyFeed
 
 		public async Task AddSource(FeedSource source) {
 			await Console.Error.WriteLineAsync("[Builder] Downloading content");
-			WebResponse response = await WebRequest.Create(source.Feed.Url).GetResponseAsync();
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(source.Feed.Url);
+
+			request.UserAgent = UserAgentHelper.UserAgent;
+			WebResponse response = await request.GetResponseAsync();
 
 			await Console.Error.WriteLineAsync("[Builder] Generating feed header");
 

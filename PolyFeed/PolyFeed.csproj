@@ -149,6 +149,7 @@
     <Compile Include="ReferenceSubstitutor.cs" />
     <Compile Include="SnakeCasePropertySelector.cs" />
     <Compile Include="Helpers\HtmlHelpers.cs" />
+    <Compile Include="Helpers\UserAgentHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
