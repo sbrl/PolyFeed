@@ -48,7 +48,7 @@ namespace PolyFeed.Helpers
 				if (node.Attributes["href"] != null) attributeName = "href";
 				if (node.Attributes["src"] != null) attributeName = "src";
 
-				if (node.Attributes[attributeName] == null)
+				if (attributeName == null || node.Attributes[attributeName] == null)
 					return;
 
 				node.Attributes[attributeName].Value = new Uri(
