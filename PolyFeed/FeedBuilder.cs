@@ -118,6 +118,8 @@ namespace PolyFeed
 						)
 					);
 				}
+				else if (source.Entries.Published != null) // Use the publish date if available
+					nextItem.LastUpdated = nextItem.Published;
 				else // It requires one, apparently
 					nextItem.LastUpdated = DateTimeOffset.Now;
 
