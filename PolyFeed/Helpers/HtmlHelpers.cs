@@ -15,10 +15,12 @@ namespace PolyFeed.Helpers
 			if (selectedNode == null)
 				throw new ApplicationException($"Error: Selector {settings.Selector} failed to find any elements.");
 
+			// Hack: Add physical newlines to <br />s to make date parsing easier for LastUpdated / Published.
+			// Also means that we match Firefox functionality.
 			foreach (HtmlNode nextNode in htmlNode.QuerySelectorAll("br")) {
 				nextNode.InnerHtml = "\n";
 			}
-			Console.WriteLine("InnerText: {0}", selectedNode.InnerText);
+
 			if (string.IsNullOrWhiteSpace(settings.Attribute))
 				return selectedNode.InnerText;
 
