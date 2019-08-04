@@ -111,7 +111,7 @@ namespace PolyFeed
 					);
 
 				}
-				if (source.Entries.Published != null) {
+				if (source.Entries.LastUpdated != null) {
 					nextItem.LastUpdated = DateTime.Parse(
 						nextNode.QuerySelectorAttributeOrText(
 							source.Entries.LastUpdated
