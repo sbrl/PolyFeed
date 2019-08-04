@@ -1,0 +1,31 @@
+[feed]
+output = "OCReMix-Remixes.atom"
+
+# Actual Official Feed: http://ocremix.org/feeds/ten20/
+url = "https://ocremix.org/remixes/?&offset=0&sort=datedesc"
+
+source_type = "html"
+
+title = "OCReMixes"
+subtitle = "Latest remixes on OC ReMix"
+
+logo_url = { selector = ".header", attribute = "src" }
+
+[entries]
+selector = ".area-link"
+title = "{{a.main.featured}} by {{td:nth-child(2) a.featured}} - {{.color-secondary}}"
+content = """
+<p>{a}</p>
+<p><strong>{a.main.featured}</strong></p>
+<p>{td:nth-child(2)}</p>
+<p>Remixing {.color-secondary}</p>
+"""
+
+url = { selector = "a.main.featured", attribute = "href" }
+# or, for a direct link to YouTube:
+#url = { selector = "a.main.featured", attribute = "data-preview" }
+
+author_name = { selector = "td:nth-child(2) a.featured" }
+
+published = { selector = "td:nth-child(3)", attribute = "" }
+# last_updated = { selector = "", attribute = "" }
