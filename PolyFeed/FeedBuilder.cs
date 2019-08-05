@@ -123,14 +123,20 @@ namespace PolyFeed
 				else // It requires one, apparently
 					nextItem.LastUpdated = DateTimeOffset.Now;
 
-				SyndicationPerson author = new SyndicationPerson(
-					nextNode.QuerySelectorAttributeOrText(source.Entries.AuthorName).Trim(),
-					""
-				);
-				if(source.Entries.AuthorUrl != null)
-					author.Uri = nextNode.QuerySelectorAttributeOrText(source.Entries.AuthorUrl);
 
-				nextItem.AddContributor(author);
+				if (source.Entries.AuthorName != null) {
+					SyndicationPerson author = new SyndicationPerson(
+						nextNode.QuerySelectorAttributeOrText(source.Entries.AuthorName).Trim(),
+						""
+					);
+					if (source.Entries.AuthorUrl != null)
+						author.Uri = nextNode.QuerySelectorAttributeOrText(source.Entries.AuthorUrl);
+
+					nextItem.AddContributor(author);
+				}
+				else
+					nextItem.AddContributor(new SyndicationPerson("Unknown", ""));
+
 
 				await feed.Write(nextItem);
 
