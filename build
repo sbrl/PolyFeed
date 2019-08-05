@@ -72,6 +72,14 @@ task_build() {
 }
 
 task_package() {
+	task_begin "Preparing for packaging";
+	tmp_dir="./deb_package";
+	mkdir -p "${tmp_dir}/usr/lib/polyfeed";
+	mkdir -p "${tmp_dir}/usr/bin";
+	cp -ral PolyFeed/bin/Release/* /usr/lib/polyfeed;
+	cp -al polyfeed "${tmp_dir}/usr/bin";
+	task_end $?;
+	
 	task_begin "Packaging as .deb";
 	version="$(awk '/version = / { print($3) }' PolyFeed.sln | tr -d '\n\r')-$(date +"%Y-%m-%dT%H:%M")+$(git rev-parse HEAD | head -c7)";
 	fpm -s dir -t deb -n polyfeed -v "${version}" --license MPL-2.0 \
@@ -79,8 +87,7 @@ task_package() {
 		--description "Create Atom feeds for websites that don't support it" \
 		--url "https://github.com/sbrl/PolyFeed" \
 		--depends mono-runtime \
-		PolyFeed/bin/Release=/usr/lib/polyfeed \
-		polyfeed=/usr/bin;
+		"${tmp_dir}";
 	task_end $?;
 }
 
