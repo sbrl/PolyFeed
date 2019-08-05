@@ -1,0 +1,30 @@
+[feed]
+output = "OCReMix-Remix-Albums.atom"
+
+# Actual Official Feed: http://ocremix.org/feeds/ten20/
+url = "https://ocremix.org/albums/"
+
+source_type = "html"
+
+title = "OCReMix Albums"
+subtitle = "Latest Albums on OC ReMix"
+
+logo_url = { selector = ".header", attribute = "src" }
+
+[entries]
+selector = ".area-link"
+title = "{{a.main.featured}}"
+content = """
+<p>{td:first-child}</p>
+<p>{td:nth-child(2)}</p>
+"""
+
+url = { selector = "a.main.featured", attribute = "href" }
+# or, for a direct link to YouTube:
+#url = { selector = "a.main.featured", attribute = "data-preview" }
+
+# author_name = { selector = "" }
+# author_url = { selector = "" }
+
+published = { selector = "td:nth-child(4)", attribute = "" }
+# last_updated = { selector = "", attribute = "" }
