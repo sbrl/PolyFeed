@@ -14,4 +14,8 @@ Global
 		{15E98995-9BDA-4874-B8AF-0C58665A6DDD}.Release|x86.ActiveCfg = Release|x86
 		{15E98995-9BDA-4874-B8AF-0C58665A6DDD}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		description = Create Atom feeds for websites that don't support it.
+		version = 0.1.1
+	EndGlobalSection
 EndGlobal
