@@ -82,7 +82,7 @@ task_package() {
 		--url "https://github.com/sbrl/PolyFeed" \
 		--depends mono-runtime \
 		PolyFeed/bin/polyfeed=/usr/lib \
-		polyfeed=/usr/bin;
+		polyfeed=/usr/bin/polyfeed;
 	execute rm -r PolyFeed/bin/polyfeed;
 	execute dpkg -c *.deb; # We don't know it's name :P
 	task_end $?;
