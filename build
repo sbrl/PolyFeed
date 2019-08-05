@@ -52,6 +52,7 @@ task_setup() {
 	check_command msbuild true;
 	check_command nuget true;
 	check_command fpm true;
+	check_command awk true;
 	
 	task_end 0;
 	
@@ -72,7 +73,7 @@ task_build() {
 
 task_package() {
 	task_begin "Packaging as .deb";
-	version="$(xidel -q PolyFeed/PolyFeed.csproj -e "css('ReleaseVersion')")-$(date +"%Y-%m-%dT%H:%M")+$(git rev-parse HEAD | head -c7)";
+	version="$(awk '/version = / { print $3 }' PolyFeed.sln)-$(date +"%Y-%m-%dT%H:%M")+$(git rev-parse HEAD | head -c7)";
 	execute fpm -s dir -t deb -n polyfeed -v "${version}" --license MPL-2.0 \
 		--architecture all --maintainer "Starbeamrainbowlabs <feedback@starbeamrainbowlabs.com>" \
 		--description "Create Atom feeds for websites that don't support it" \
