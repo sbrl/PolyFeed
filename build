@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Make sure the current directory is the location of this script to simplify matters
-cd "$(dirname $(readlink -f $0))";
+cd "$(dirname "$(readlink -f $0)")" || exit 1;
 ################
 ### Settings ###
 ################
@@ -16,18 +16,20 @@ lantern_path="./lantern-build-engine";
 ###
 
 # Put any custom settings here.
-build_output_folder="./dist";
+# build_output_folder="./dist";
 
 ###############################################################################
 
 # Check out the lantern git submodule if needed
 if [ ! -f "${lantern_path}/lantern.sh" ]; then git submodule update --init "${lantern_path}"; fi
 
+# shellcheck disable=SC1090
 source "${lantern_path}/lantern.sh";
 
 if [[ "$#" -lt 1 ]]; then
 	echo -e "${FBLE}${project_name}${RS} build script";
 	echo -e "    by Starbeamrainbowlabs";
+	# shellcheck disable=SC2154
 	echo -e "${LC}Powered by the lantern build engine, v${version}${RS}";
 	echo -e "";
 	echo -e "${CSECTION}Usage${RS}";
