@@ -74,7 +74,7 @@ task_build() {
 
 task_package() {
 	task_begin "Packaging as .deb";
-	execute ln -s Release PolyFeed/bin/polyfeed;
+	execute cp -ral Release PolyFeed/bin/polyfeed;
 	version="$(awk '/version = / { print($3) }' PolyFeed.sln | tr -d '\n\r')-$(date +"%Y-%m-%dT%H:%M")+$(git rev-parse HEAD | head -c7)";
 	fpm -s dir -t deb -n polyfeed -v "${version}" --license MPL-2.0 \
 		--architecture all --maintainer "Starbeamrainbowlabs <feedback@starbeamrainbowlabs.com>" \
@@ -83,7 +83,7 @@ task_package() {
 		--depends mono-runtime \
 		PolyFeed/bin/polyfeed=/usr/lib \
 		polyfeed=/usr/bin;
-	execute rm PolyFeed/bin/polyfeed;
+	execute rm -r PolyFeed/bin/polyfeed;
 	execute dpkg -c *.deb; # We don't know it's name :P
 	task_end $?;
 	
