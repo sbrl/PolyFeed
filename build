@@ -70,12 +70,25 @@ task_build() {
 
 task_package() {
 	task_begin "Packaging as .deb";
-	
+	version="$(xidel -q PolyFeed/PolyFeed.csproj -e "css('ReleaseVersion')")-$(date +"%Y-%m-%dT%H:%M")+$(git rev-parse HEAD | head -c7)";
+	execute fpm -s dir -t deb -n polyfeed -v "${version}" --license MPL-2.0 \
+		--architecture all --maintainer "Starbeamrainbowlabs <feedback@starbeamrainbowlabs.com>" \
+		--description "Create Atom feeds for websites that don't support it" \
+		--url "https://github.com/sbrl/PolyFeed" \
+		--depends mono-runtime \
+		PolyFeed/bin/Release=/usr/lib/polyfeed \
+		polyfeed=/usr/bin;
+	task_end $?;
+}
+
+task_archive() {
+	task_begin "Archiving artifacts";
+	mv *.deb "${ARCHIVE}";
 	task_end $?;
 }
 
 task_ci() {
-	tasks_run setup build package;
+	tasks_run setup build package archive;
 }
 
 ###############################################################################
