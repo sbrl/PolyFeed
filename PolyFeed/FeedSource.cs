@@ -96,7 +96,14 @@ namespace PolyFeed
 		/// </summary>
 		public SelectorSettings LastUpdated { get; set; }
 
+		/// <summary>
+		/// The selector for the name of the author of an entry.
+		/// </summary>
 		public SelectorSettings AuthorName { get; set; }
+		/// <summary>
+		/// The selector for the url that points to a page that represents 
+		/// the author of an entry.
+		/// </summary>
 		public SelectorSettings AuthorUrl { get; set; }
 
 	}
