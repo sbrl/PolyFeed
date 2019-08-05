@@ -26,6 +26,7 @@ url = { selector = "a.main.featured", attribute = "href" }
 #url = { selector = "a.main.featured", attribute = "data-preview" }
 
 author_name = { selector = "td:nth-child(2) a.featured" }
+author_url = { selector = "td:nth-child(2) a.featured", attribute =  "href" }
 
 published = { selector = "td:nth-child(3)", attribute = "" }
 # last_updated = { selector = "", attribute = "" }
