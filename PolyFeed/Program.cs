@@ -123,6 +123,7 @@ namespace PolyFeed
 
 		public static string GetProgramVersion()
 		{
+			// BUG: This isn't returning 0.1.1 for some reason :-/
 			Version version = Assembly.GetExecutingAssembly().GetName().Version;
 			return $"{version.Major}.{version.Minor}";
 		}

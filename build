@@ -79,7 +79,9 @@ task_package() {
 	fpm -s dir -t deb -n polyfeed \
 	 	--epoch 0 -v "${version}" \
 		--license MPL-2.0 \
-		--architecture all --maintainer "Starbeamrainbowlabs <feedback@starbeamrainbowlabs.com>" \
+		--architecture all \
+		--maintainer "Starbeamrainbowlabs <feedback@starbeamrainbowlabs.com>" \
+		--vendor "Starbeamrainbowlabs <feedback@starbeamrainbowlabs.com>" \
 		--description "Create Atom feeds for websites that don't support it" \
 		--url "https://github.com/sbrl/PolyFeed" \
 		--depends mono-runtime \
