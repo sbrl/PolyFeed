@@ -15,8 +15,11 @@ lantern_path="./lantern-build-engine";
 # Custom Settings
 ###
 
-# Put any custom settings here.
-# build_output_folder="./dist";
+# Deployment settings
+deploy_ssh_user="ci";
+deploy_ssh_host="apt.starbeamrainbowlabs.com";
+deploy_ssh_port="22";
+deploy_root_dir="CIAptPackages";
 
 ###############################################################################
 
@@ -99,8 +102,24 @@ task_archive() {
 	task_end $?;
 }
 
+task_upload-release() {
+	task_begin "Uploading release .deb file";
+	
+	sftp -i "${SSH_KEY_PATH}" -P "${deploy_ssh_port}" -o PasswordAuthentication=no "${deploy_ssh_user}@${deploy_ssh_host}" << SFTPCOMMANDS
+put ./*.deb ${deploy_root_dir}
+bye
+SFTPCOMMANDS
+	
+	task_end $?;
+}
+
 task_ci() {
 	tasks_run setup build package archive;
+	
+	if [[ "$(git tag --points-at HEAD | wc -l)" -gt 0 ]]; then
+		echo "Found tag $(git tag --points-at HEAD), uploading release";
+		tasks_run upload-release;
+	fi
 }
 
 ###############################################################################
