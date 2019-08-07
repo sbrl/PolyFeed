@@ -106,6 +106,7 @@ task_archive() {
 _upload_deb() {
 	filename="${1}";
 	
+	echo "Found ${filename}";
 	sftp -i "${SSH_KEY_PATH}" -P "${deploy_ssh_port}" -o PasswordAuthentication=no "${deploy_ssh_user}@${deploy_ssh_host}" << SFTPCOMMANDS
 put ${filename} ${deploy_root_dir}
 bye
@@ -115,10 +116,10 @@ SFTPCOMMANDS
 }
 
 task_upload-release() {
-	task_begin "Uploading release .deb file";
+	task_begin "Uploading release .deb file(s)";
 	
+	find . -maxdepth 1 -type f -name "*.deb" -print0 | xargs --null -n1 -I{} bash -c '_upload_deb "{}"';
 	
-	find . -maxdepth 1 -type f -name "*.deb" | xargs -n1 -I{} bash -c '_upload_deb "{}"';
 	task_end $?;
 }
 
