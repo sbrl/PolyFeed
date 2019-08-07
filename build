@@ -102,14 +102,23 @@ task_archive() {
 	task_end $?;
 }
 
-task_upload-release() {
-	task_begin "Uploading release .deb file";
+# $1 - The filename to upload
+_upload_deb() {
+	filename="${1}";
 	
 	sftp -i "${SSH_KEY_PATH}" -P "${deploy_ssh_port}" -o PasswordAuthentication=no "${deploy_ssh_user}@${deploy_ssh_host}" << SFTPCOMMANDS
-put ./*.deb ${deploy_root_dir}
+put ${filename} ${deploy_root_dir}
 bye
 SFTPCOMMANDS
 	
+	
+}
+
+task_upload-release() {
+	task_begin "Uploading release .deb file";
+	
+	
+	find . -maxdepth 1 -type f -name "*.deb" | xargs -n1 -I{} bash -c '_upload_deb "{}"';
 	task_end $?;
 }
 
