@@ -18,7 +18,7 @@ lantern_path="./lantern-build-engine";
 # Deployment settings
 deploy_ssh_user="ci";
 deploy_ssh_host="apt.starbeamrainbowlabs.com";
-deploy_ssh_port="22";
+deploy_ssh_port="2403";
 deploy_root_dir="CIAptPackages";
 
 ###############################################################################
