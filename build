@@ -108,7 +108,7 @@ _upload_deb() {
 	
 	echo "Found ${filename}";
 	sftp -i "${SSH_KEY_PATH}" -P "${deploy_ssh_port}" -o PasswordAuthentication=no "${deploy_ssh_user}@${deploy_ssh_host}" << SFTPCOMMANDS
-put ${filename} ${deploy_root_dir}
+put ${filename} ${deploy_root_dir}/
 bye
 SFTPCOMMANDS
 	
