@@ -91,7 +91,7 @@ task_package() {
 		PolyFeed/bin/polyfeed=/usr/lib \
 		polyfeed=/usr/bin/polyfeed;
 	execute rm -r PolyFeed/bin/polyfeed;
-	execute dpkg -c *.deb; # We don't know it's name :P
+	execute dpkg -c "$(ls -ct *.deb | head -n1)"; # We don't know it's name :P
 	task_end $?;
 	
 }
@@ -117,9 +117,7 @@ SFTPCOMMANDS
 
 task_upload-release() {
 	task_begin "Uploading release .deb file(s)";
-	
-	find . -maxdepth 1 -type f -name "*.deb" -print0 | xargs --null -n1 -I{} bash -c '_upload_deb "{}"';
-	
+	_upload_deb "$(ls -ct *.deb | head -n1)";
 	task_end $?;
 }
 
