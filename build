@@ -133,6 +133,7 @@ task_ci() {
 	
 	if [[ "${GIT_REF_TYPE}" == "tags" ]]; then
 		echo "Found tag ${GIT_TAG_NAME}, uploading release";
+		
 		tasks_run upload-release;
 	fi
 }
