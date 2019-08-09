@@ -126,7 +126,7 @@ task_ci() {
 	check_env_variable "ARCHIVE";
 	check_env_variable "GIT_REF_NAME";
 	check_env_variable "GIT_REF_TYPE";
-	check_env_variable "GIT_TAG_NAME";
+	[[ "${GIT_REF_TYPE}" == "tags" ]] && check_env_variable "GIT_TAG_NAME";
 	task_end 0;
 	
 	tasks_run setup build package archive;
