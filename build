@@ -122,10 +122,17 @@ task_upload-release() {
 }
 
 task_ci() {
+	task_begin "Checking environment";
+	check_env_variable "ARCHIVE";
+	check_env_variable "GIT_REF_NAME";
+	check_env_variable "GIT_REF_TYPE";
+	check_env_variable "GIT_TAG_NAME";
+	task_end 0;
+	
 	tasks_run setup build package archive;
 	
-	if [[ "$(git tag --points-at HEAD | wc -l)" -gt 0 ]]; then
-		echo "Found tag $(git tag --points-at HEAD), uploading release";
+	if [[ "${GIT_REF_TYPE}" == "tags" ]]; then
+		echo "Found tag ${GIT_TAG_NAME}, uploading release";
 		tasks_run upload-release;
 	fi
 }
