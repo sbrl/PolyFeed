@@ -118,7 +118,7 @@ SFTPCOMMANDS
 task_upload-release() {
 	task_begin "Uploading release .deb file(s)";
 	# We grab from ARCHIVE here, as we expect that only archived .deb files are final & stable.
-	_upload_deb "$(ls -ct "${ARCHIVE}/*.deb" | head -n1)";
+	_upload_deb "$(find "${ARCHIVE}" -name "*.deb" | head -n1)";
 	task_end $?;
 }
 
