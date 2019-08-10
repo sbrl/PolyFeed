@@ -12,6 +12,12 @@ namespace PolyFeed.ParserProviders
 	public interface IParserProvider
 	{
 		/// <summary>
+		/// The identifier of this provider.
+		/// Used in the .toml configuration file to specify which parser to use.
+		/// </summary>
+		string Identifier { get; }
+
+		/// <summary>
 		/// Sets the output feed that parsed output should be written to.
 		/// </summary>
 		/// <param name="feed">The output feed writer that output should be written to.</param>

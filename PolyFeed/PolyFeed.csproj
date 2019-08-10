@@ -153,6 +153,7 @@
     <Compile Include="Helpers\UserAgentHelper.cs" />
     <Compile Include="Helpers\ReflectionHelpers.cs" />
     <Compile Include="ParserProviders\IParserProvider.cs" />
+    <Compile Include="ParserProviders\HtmlParserProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
