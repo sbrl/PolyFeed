@@ -151,6 +151,7 @@
     <Compile Include="SnakeCasePropertySelector.cs" />
     <Compile Include="Helpers\HtmlHelpers.cs" />
     <Compile Include="Helpers\UserAgentHelper.cs" />
+    <Compile Include="Helpers\ReflectionHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
