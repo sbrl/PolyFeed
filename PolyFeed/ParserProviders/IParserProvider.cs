@@ -26,6 +26,7 @@ namespace PolyFeed.ParserProviders
 		/// <param name="feed">The output feed writer that output should be written to.</param>
 		/// <param name="xml">The underlying XML feed try not to use this unless you *really* have to.</param>
 		void SetOutputFeed(AtomFeedWriter feed, XmlWriter xml);
+
 		/// <summary>
 		/// Parses a web response that's paired with a given <see cref="FeedSource" />.
 		/// </summary>

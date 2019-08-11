@@ -126,15 +126,13 @@
     <Reference Include="Fizzler.Systems.HtmlAgilityPack">
       <HintPath>..\packages\Fizzler.Systems.HtmlAgilityPack.1.2.0\lib\netstandard1.3\Fizzler.Systems.HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.SyndicationFeed.ReaderWriter">
       <HintPath>..\packages\Microsoft.SyndicationFeed.ReaderWriter.1.0.2\lib\netstandard1.3\Microsoft.SyndicationFeed.ReaderWriter.dll</HintPath>
     </Reference>
     <Reference Include="Nett">
       <HintPath>..\packages\Nett.0.13.0\lib\net40\Nett.dll</HintPath>
     </Reference>
+    <Reference Include="System.Json" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -154,6 +152,7 @@
     <Compile Include="Helpers\ReflectionHelpers.cs" />
     <Compile Include="ParserProviders\IParserProvider.cs" />
     <Compile Include="ParserProviders\HtmlParserProvider.cs" />
+    <Compile Include="ParserProviders\JsonParserProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
