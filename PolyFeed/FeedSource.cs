@@ -37,7 +37,6 @@ namespace PolyFeed
 		/// The type of source document to expect.
 		/// </summary>
 		public string SourceType { get; set; }
-		public SourceType Type => (SourceType)Enum.Parse(typeof(SourceType), SourceType, true);
 
 
 		/// <summary>

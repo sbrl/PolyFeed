@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -10,6 +11,7 @@ using HtmlAgilityPack;
 using Microsoft.SyndicationFeed;
 using Microsoft.SyndicationFeed.Atom;
 using PolyFeed.Helpers;
+using PolyFeed.ParserProviders;
 
 namespace PolyFeed
 {
@@ -49,98 +51,30 @@ namespace PolyFeed
 
 			string contentType = response.Headers.Get("content-type");
 
-			switch (source.Feed.Type) {
-				case SourceType.HTML:
-					await AddSourceHtml(source, response);
-					break;
-				default:
-					throw new NotImplementedException($"Error: The source type {source.Feed.Type} hasn't been implemented yet.");
-			}
+			IParserProvider provider = GetProvider(source.Feed.SourceType);
+			if(provider == null)
+				throw new ApplicationException($"Error: A provider for the source type {source.Feed.SourceType} wasn't found.");
+
+			provider.SetOutputFeed(feed, xml);
+			await provider.ParseWebResponse(source, response);
 
 			await Console.Error.WriteLineAsync("[Builder] Done!");
 		}
 
-		private async Task AddSourceHtml(FeedSource source, WebResponse response) {
-			await Console.Error.WriteLineAsync("[Builder/Html] Parsing Html");
+		private IParserProvider GetProvider(string identifier)
+		{
+			IEnumerable<Type> possibleTypes = ReflectionUtilities.IterateImplementingTypes(
+				typeof(IParserProvider),
+				Assembly.GetExecutingAssembly()
+			);
 
-			// Parse the HTML
-			HtmlDocument html = new HtmlDocument();
-			using (StreamReader reader = new StreamReader(response.GetResponseStream()))
-				html.LoadHtml(await reader.ReadToEndAsync());
-
-			HtmlNode document = html.DocumentNode;
-
-			document.AbsolutifyUris(new Uri(source.Feed.Url));
-
-
-			await Console.Error.WriteLineAsync("[Builder/Html] Generating feed content");
-
-			// Add the title
-			await feed.WriteTitle(ReferenceSubstitutor.Replace(source.Feed.Title, document));
-			await feed.WriteSubtitle(ReferenceSubstitutor.Replace(source.Feed.Subtitle, document));
-
-			// Add the logo
-			if (source.Feed.Logo != null) {
-				HtmlNode logoNode = document.QuerySelector(source.Feed.Logo.Selector);
-				xml.WriteElementString("logo", logoNode.Attributes[source.Feed.Logo.Attribute].Value);
+			foreach (Type next in possibleTypes) {
+				IParserProvider candidate = (IParserProvider)Activator.CreateInstance(next);
+				if (candidate.Identifier == identifier)
+					return candidate;
 			}
 
-			// Add the feed entries
-			foreach (HtmlNode nextNode in document.QuerySelectorAll(source.Entries.Selector)) {
-				HtmlNode urlNode = nextNode.QuerySelector(source.Entries.Url.Selector);
-				if (urlNode == null)
-					throw new ApplicationException("Error: Failed to match entry url selector against an element.");
-
-				string url = source.Entries.Url.Attribute == string.Empty ?
-					urlNode.InnerText : urlNode.Attributes[source.Entries.Url.Attribute].DeEntitizeValue;
-
-				Uri entryUri = new Uri(new Uri(source.Feed.Url), new Uri(url));
-				AtomEntry nextItem = new AtomEntry() {
-					Id = entryUri.ToString(),
-					Title = ReferenceSubstitutor.Replace(source.Entries.Title, nextNode),
-					Description = ReferenceSubstitutor.Replace(source.Entries.Content, nextNode),
-					ContentType = "html"
-				};
-				nextItem.AddLink(new SyndicationLink(entryUri, AtomLinkTypes.Alternate));
-
-				if (source.Entries.Published != null) {
-					nextItem.Published = DateTime.Parse(
-						nextNode.QuerySelectorAttributeOrText(
-							source.Entries.Published
-						)
-					);
-
-				}
-				if (source.Entries.LastUpdated != null) {
-					nextItem.LastUpdated = DateTime.Parse(
-						nextNode.QuerySelectorAttributeOrText(
-							source.Entries.LastUpdated
-						)
-					);
-				}
-				else if (source.Entries.Published != null) // Use the publish date if available
-					nextItem.LastUpdated = nextItem.Published;
-				else // It requires one, apparently
-					nextItem.LastUpdated = DateTimeOffset.Now;
-
-
-				if (source.Entries.AuthorName != null) {
-					SyndicationPerson author = new SyndicationPerson(
-						nextNode.QuerySelectorAttributeOrText(source.Entries.AuthorName).Trim(),
-						""
-					);
-					if (source.Entries.AuthorUrl != null)
-						author.Uri = nextNode.QuerySelectorAttributeOrText(source.Entries.AuthorUrl);
-
-					nextItem.AddContributor(author);
-				}
-				else
-					nextItem.AddContributor(new SyndicationPerson("Unknown", ""));
-
-
-				await feed.Write(nextItem);
-
-			}
+			return null;
 		}
 
 		public async Task<string> Render()

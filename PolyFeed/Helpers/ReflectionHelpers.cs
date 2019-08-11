@@ -77,6 +77,10 @@ namespace PolyFeed.Helpers
 			// FUTURE: Add caching here? Reflection is slow
 			foreach (Type nextType in IterateAllLoadedTypes())
 			{
+				// Interfaces implement themselves, but we don't want to return the interface itself
+				if (nextType == targetInterface)
+					continue;
+
 				// Make sure it implements the specified interface
 				if (!targetInterface.IsAssignableFrom(nextType))
 					continue;
