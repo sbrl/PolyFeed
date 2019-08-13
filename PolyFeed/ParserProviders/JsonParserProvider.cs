@@ -36,7 +36,7 @@ namespace PolyFeed.ParserProviders
 				throw new ApplicationException("Error: Failed to parse the JSON into an object.");
 
 
-			throw new NotImplementedException("Error %01: Not implemented :-/");
+			throw new NotImplementedException("Error 501: Not implemented :-/");
 
 
 		}

@@ -153,6 +153,7 @@
     <Compile Include="ParserProviders\IParserProvider.cs" />
     <Compile Include="ParserProviders\HtmlParserProvider.cs" />
     <Compile Include="ParserProviders\JsonParserProvider.cs" />
+    <Compile Include="Helpers\EmbeddedFiles.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
